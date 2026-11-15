@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>MANY BRICKS BREAKER</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #0d0f12;
+      color: #f0f4f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 450px;
+      max-height: 820px;
+      background: #14171c;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    /* オーバーレイ画面共通 */
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 18, 24, 0.94);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+      transition: opacity 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #0d0f12;
+      color: #f0f4f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 450px;
+      max-height: 820px;
+      background: #14171c;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* オーバーレイ画面共通 */
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 18, 24, 0.94);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+      transition: opacity 0.2s ease;
+    }
+
+    .screen.hidden {
+      display: none;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #4ade80, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 28px;
+      letter-spacing: 1px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+      transition: transform 0.1s, opacity 0.15s;
+      width: 240px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-secondary {
+      background: #272e3b;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      color: #e2e8f0;
+    }
+
+    .btn-danger {
+      background: #991b1b;
+      box-shadow: none;
+      font-size: 12px;
+      padding: 8px 14px;
+      width: auto;
+    }
+
+    /* ステージ選択グリッド */
+    #stage-select-screen {
+      justify-content: flex-start;
+      padding-top: 24px;
+    }
+
+    .stage-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .stage-header h2 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .stage-grid {
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      touch-action: pan-y;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding-bottom: 16px;
+    }
+
+    .stage-card {
+      background: #1e242d;
+      border: 2px solid #2e3746;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.15s;
+      position: relative;
+    }
+
+    .stage-card:active:not(.locked) {
+      transform: scale(0.97);
+    }
+
+    .stage-card.cleared {
+      border-color: #22c55e;
+    }
+
+    .stage-card.unlocked {
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .stage-card.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .stage-thumb {
+      width: 74px;
+      height: 86px;
+      background: #0f1217;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #2c3545;
+    }
+
+    .stage-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+
+    .stage-meta {
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .badge-clear {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #22c55e;
+      color: #052e16;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .stage-footer {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid #28303d;
+    }
+
+    .small-btn {
+      background: #272e3b;
+      color: #cbd5e1;
+      border: 1px solid #3b4559;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* リザルト・ポーズ */
+    .stat-box {
+      background: #1e242d;
+      border: 1px solid #2f394a;
+      border-radius: 12px;
+      padding: 16px 24px;
+      width: 240px;
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+    }
+
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stat-val {
+      font-weight: 800;
+      color: #4ade80;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    .shake {
+      animation: shake 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- タイトル画面 -->
+    <div id="title-screen" class="screen">
+      <h1>MANY BRICKS<br>BREAKER</h1>
+      <div class="subtitle">MICRO-GRID &amp; MULTI-BALL EDITION</div>
+      <button id="btn-play" class="btn">PLAY</button>
+      <button id="btn-stage-select" class="btn btn-secondary">STAGE SELECT</button>
+      <button id="btn-sound-title" class="small-btn" style="margin-top: 12px;">SOUND: ON</button>
+    </div>
+
+    <!-- ステージ選択画面 -->
+    <div id="stage-select-screen" class="screen hidden">
+      <div class="stage-header">
+        <h2>STAGE SELECT</h2>
+        <button id="btn-back-title" class="small-btn">TITLE</button>
+      </div>
+      <div id="stage-grid" class="stage-grid"></div>
+      <div class="stage-footer">
+        <button id="btn-unlock-all" class="small-btn">全ステージ仮開放</button>
+        <button id="btn-reset-save" class="small-btn" style="color: #f87171;">記録リセット</button>
+      </div>
+    </div>
+
+    <!-- ポーズ画面 -->
+    <div id="pause-screen" class="screen hidden">
+      <h2 style="font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;">PAUSED</h2>
+      <button id="btn-resume" class="btn">RESUME</button>
+      <button id="btn-retry" class="btn btn-secondary">RETRY</button>
+      <button id="btn-pause-stages" class="btn btn-secondary">STAGE SELECT</button>
+      <button id="btn-sound-pause" class="small-btn" style="margin-top: 8px;">SOUND: ON</button>
+    </div>
+
+    <!-- リザルト画面 -->
+    <div id="result-screen" class="screen hidden">
+      <h2 id="result-title" style="font-size: 26px; margin-bottom: 14px; letter-spacing: 1px;">STAGE CLEAR!</h2>
+      <div class="stat-box">
+        <div class="stat-row"><span>SCORE</span><span id="res-score" class="stat-val">0</span></div>
+        <div class="stat-row"><span>MAX BALLS</span><span id="res-balls" class="stat-val">1</span></div>
+        <div class="stat-row"><span>TIME</span><span id="res-time" class="stat-val">0.0s</span></div>
+      </div>
+      <button id="btn-next-stage" class="btn">NEXT STAGE</button>
+      <button id="btn-result-retry" class="btn btn-secondary">REPLAY</button>
+      <button id="btn-result-stages" class="btn btn-secondary">STAGE SELECT</button>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ==========================================
+     * 1. サウンドエンジン (Web Audio API)
+     * ==========================================
+     */
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.lastHitTime = 0;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, vol = 0.08, slideTo = null) {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) {
+          osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+        }
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      hitBrick() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // 大量ヒット時の音割れ防止（最短25ms間隔）
+        if (now - this.lastHitTime < 0.025) return;
+        this.lastHitTime = now;
+        const pitch = 480 + Math.random() * 240;
+        this.playTone(pitch, 'square', 0.045, 0.04);
+      }
+
+      hitWall() {
+        this.playTone(220, 'triangle', 0.04, 0.04);
+      }
+
+      paddle() {
+        this.playTone(330, 'sine', 0.07, 0.08, 440);
+      }
+
+      powerup() {
+        this.playTone(520, 'square', 0.14, 0.07, 1040);
+      }
+
+      bomb() {
+        this.playTone(140, 'sawtooth', 0.25, 0.12, 35);
+      }
+
+      clear() {
+        if (!this.enabled || !this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((n, i) => {
+          setTimeout(() => this.playTone(n, 'square', 0.18, 0.08), i * 90);
+        });
+      }
+
+      loseLife() {
+        this.playTone(260, 'sawtooth', 0.28, 0.09, 90);
+      }
+    }
+
+    const sfx = new SoundFX();
+
+    /**
+     * ==========================================
+     * 2. ステージ定義 (31列 x 36行 高密度グリッド)
+     * ==========================================
+     * 0: 空白
+     * 1: 通常ブロック(緑)
+     * 2: 通常ブロック(水色/アクセント)
+     * 3: 硬質ブロック(HP3)
+     * 4: 爆弾ブロック(周囲5x5誘爆)
+     * 5: アイテム確定ブロック(x3 / +3)
+     * 8: 黄色トリガーブロック(全ボールx3分裂 + 周囲破壊)
+     * 9: 不可壊ウォール(グレー)
+     */
+    const COLS = 31;
+    const ROWS = 36;
+
+    function createStages() {
+      const stages = [];
+
+      // --- STAGE 1: INVADER PIXEL ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        const pattern = [
+          "00000100000000000100000",
+          "00000010000000001000000",
+          "00000111111111111100000",
+          "00001122111111122110000",
+          "00011122111511122111000",
+          "00111111111111111111100",
+          "00101111114141111110100",
+          "00101000000000000010100",
+          "00000111100000111100000"
+        ];
+        for (let r = 0; r < pattern.length; r++) {
+          for (let c = 0; c < pattern[r].length; c++) {
+            const val = parseInt(pattern[r][c], 10);
+            if (val > 0) {
+              // 縦2倍・横少し広げて密度感を出す
+              g[4 + r * 2][4 + c] = val;
+              g[5 + r * 2][4 + c] = val === 5 ? 1 : val;
+            }
+          }
+        }
+        // 下部にアイテムブロックを少し配置
+        g[23][10] = 5;
+        g[23][15] = 5;
+        g[23][20] = 5;
+        stages.push({ id: 1, name: "PIXEL INVADER", grid: g });
+      }
+
+      // --- STAGE 2: TWIN POCKETS ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        for (let r = 2; r < 26; r++) {
+          for (let c = 2; c < COLS - 2; c++) {
+            if (c === 15) {
+              g[r][c] = 9; // 中央の仕切り壁
+            } else if (r === 2 || c === 2 || c === COLS - 3) {
+              g[r][c] = 9;
+            } else {
+              g[r][c] = (r + c) % 2 === 0 ? 1 : 2;
+            }
+          }
+        }
+        // 爆弾とアイテム配置
+        g[10][8] = 4;
+        g[10][22] = 4;
+        g[18][8] = 5;
+        g[18][22] = 5;
+        g[24][8] = 5;
+        g[24][22] = 5;
+        stages.push({ id: 2, name: "TWIN POCKETS", grid: g });
+      }
+
+      // --- STAGE 3: BOMB MATRIX ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        for (let r = 3; r < 27; r++) {
+          for (let c = 3; c < COLS - 3; c++) {
+            if ((r % 5 === 0) && (c % 5 === 0)) {
+              g[r][c] = 4; // 規則的な爆弾チェーン
+            } else if ((r % 5 === 2) && (c % 6 === 3)) {
+              g[r][c] = 5;
+            } else if (r === 3 || r === 26 || c === 3 || c === COLS - 4) {
+              g[r][c] = 3; // 硬質フレーム
+            } else {
+              g[r][c] = 1;
+            }
+          }
+        }
+        stages.push({ id: 3, name: "CHAIN MATRIX", grid: g });
+      }
+
+      // --- STAGE 4: FUNNEL CORE ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        for (let r = 1; r < 28; r++) {
+          for (let c = 1; c < COLS - 1; c++) {
+            g[r][c] = 1;
+          }
+        }
+        // 漏斗（じょうご）型の不可壊ウォール
+        for (let i = 0; i < 11; i++) {
+          g[18 + i][3 + i] = 9;
+          g[18 + i][COLS - 4 - i] = 9;
+        }
+        // 中央の狭い入り口
+        for (let r = 25; r < 31; r++) {
+          g[r][13] = 9;
+          g[r][17] = 9;
+          g[r][14] = 0;
+          g[r][15] = r % 2 === 0 ? 5 : 0;
+          g[r][16] = 0;
+        }
+        g[10][15] = 8; // 黄色トリガー
+        g[8][10] = 4;
+        g[8][20] = 4;
+        stages.push({ id: 4, name: "THE FUNNEL", grid: g });
+      }
+
+      // --- STAGE 5: THE H-DUCT (スクリーンショット再現ステージ) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(1));
+        // 上部1行は余白、2行目から外周グレーウォール
+        for (let c = 0; c < COLS; c++) {
+          g[0][c] = 0;
+          g[1][c] = 9;
+          g[ROWS - 1][c] = 9;
+        }
+        for (let r = 1; r < ROWS; r++) {
+          g[r][0] = 9;
+          g[r][COLS - 1] = 9;
+        }
+
+        // H字ダクトの座標設計 (左縦穴 x=9, 右縦穴 x=21, 横連絡通路 y=21)
+        const leftX = 9;
+        const rightX = 21;
+        const topY = 12;
+        const bridgeY = 21;
+
+        // 左ダクト（下端から上まで貫通するメインパイプ）
+        for (let r = topY; r < ROWS; r++) {
+          g[r][leftX - 1] = 9;
+          g[r][leftX] = 0;
+          g[r][leftX + 1] = 9;
+        }
+        // 左ダクト出口の少し開けた空間
+        for (let r = topY - 2; r <= topY; r++) {
+          for (let c = leftX - 1; c <= leftX + 1; c++) {
+            g[r][c] = 0;
+          }
+        }
+        // 左ダクト内のアイテム配置（連続取得で一気に増殖）
+        g[32][leftX] = 5;
+        g[28][leftX] = 5;
+        g[24][leftX] = 5;
+        g[17][leftX] = 5;
+        g[14][leftX] = 5;
+
+        // 右ダクト（下端は行き止まり、上端に黄色いトリガーブロック）
+        for (let r = topY; r < ROWS - 1; r++) {
+          g[r][rightX - 1] = 9;
+          g[r][rightX] = 0;
+          g[r][rightX + 1] = 9;
+        }
+        // 右ダクト上端のキャップと黄色ブロック
+        g[topY - 1][rightX - 1] = 9;
+        g[topY - 1][rightX] = 8; // 黄色トリガー（当たると全ボールx3分裂＆上部壁開放！）
+        g[topY - 1][rightX + 1] = 9;
+        g[26][rightX] = 5;
+        g[16][rightX] = 5;
+
+        // Hの横棒（左ダクトと右ダクトをつなぐ1マス通路）
+        for (let c = leftX + 1; c <= rightX - 1; c++) {
+          g[bridgeY - 1][c] = 9;
+          g[bridgeY][c] = 0;
+          g[bridgeY + 1][c] = 9;
+        }
+        // 交差点の壁をくり抜く
+        g[bridgeY][leftX + 1] = 0;
+        g[bridgeY][rightX - 1] = 0;
+        g[bridgeY][15] = 5;
+
+        // 下側の緑ブロック部屋への入り口を開通（横通路中央から下に抜ける穴＆下壁の入口）
+        g[bridgeY + 1][15] = 0;
+        g[ROWS - 1][14] = 0;
+        g[ROWS - 1][15] = 0;
+        g[ROWS - 1][16] = 0;
+        g[28][15] = 4; // 部屋中央に誘爆用の爆弾ブロック配置
+
+        stages.push({ id: 5, name: "THE H-DUCT", grid: g });
+      }
+
+      // --- STAGE 6: FORTRESS CORE ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        for (let r = 2; r < 30; r++) {
+          for (let c = 2; c < COLS - 2; c++) {
+            const dist = Math.max(Math.abs(r - 15), Math.abs(c - 15));
+            if (dist === 11) {
+              // 外壁（下側だけ3マス開ける）
+              if (r === 26 && Math.abs(c - 15) <= 1) {
+                g[r][c] = 5;
+              } else {
+                g[r][c] = 9;
+              }
+            } else if (dist < 11) {
+              if (dist === 5 && (r === 15 || c === 15)) {
+                g[r][c] = 4;
+              } else if (dist === 0) {
+                g[r][c] = 8;
+              } else {
+                g[r][c] = (dist % 2 === 0) ? 2 : 1;
+              }
+            }
+          }
+        }
+        g[28][15] = 5;
+        stages.push({ id: 6, name: "CORE VAULT", grid: g });
+      }
+
+      // --- STAGE 7: CREEPER (マイクラのクリーパーモチーフ) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        // 8x8のクリーパーフェイス設計図 (G:濃緑1, L:明緑6, B:爆弾4, H:硬質3, I:アイテム5)
+        const creeper8x8 = [
+          "GLGGLGGL",
+          "LGGGGGLG",
+          "GBBGGGBB",
+          "GBBGGGBB",
+          "GGGBBGGG",
+          "GGBBBBGG",
+          "GGBBBBGG",
+          "GGBGGBGG"
+        ];
+        // 1マスあたり 3x3 ブロックに拡大して 24x24 の大迫力フェイスを描画
+        const startR = 4;
+        const startC = 3;
+        for (let pr = 0; pr < 8; pr++) {
+          for (let pc = 0; pc < 8; pc++) {
+            const ch = creeper8x8[pr][pc];
+            let val = 1;
+            if (ch === 'L') val = 6;
+            else if (ch === 'B') val = 4; // 目と口はクリーパーらしく爆発する！
+            for (let dr = 0; dr < 3; dr++) {
+              for (let dc = 0; dc < 3; dc++) {
+                const rr = startR + pr * 3 + dr;
+                const cc = startC + pc * 3 + dc;
+                // 爆弾は各パーツの中心に配置し、周囲は硬質ブロックで顔パーツを強調
+                if (ch === 'B') {
+                  g[rr][cc] = (dr === 1 && dc === 1) ? 4 : 3;
+                } else {
+                  g[rr][cc] = val;
+                }
+              }
+            }
+          }
+        }
+        // 顎の下に増殖アイテムを配置
+        g[29][9] = 5;
+        g[29][15] = 5;
+        g[29][21] = 5;
+        stages.push({ id: 7, name: "CREEPER", grid: g });
+      }
+
+      // --- STAGE 8: SPIRAL DUCT (渦巻きパイプ) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(1));
+        for (let c = 0; c < COLS; c++) {
+          g[0][c] = 0;
+          g[1][c] = 9;
+          g[ROWS - 1][c] = 9;
+        }
+        for (let r = 1; r < ROWS; r++) {
+          g[r][0] = 9;
+          g[r][COLS - 1] = 9;
+        }
+        // 中央下から進入し、左右へ折り返すS字ダクト
+        for (let r = 24; r < ROWS; r++) {
+          g[r][14] = 9;
+          g[r][15] = (r % 3 === 0) ? 5 : 0;
+          g[r][16] = 9;
+        }
+        for (let c = 6; c <= 24; c++) {
+          g[23][c] = 9;
+          g[24][c] = (c === 6 || c === 24) ? 5 : 0;
+          g[25][c] = 9;
+        }
+        g[25][15] = 0; // 下からの合流口
+        // 左右の上向き出口
+        for (let r = 14; r <= 24; r++) {
+          g[r][5] = 9; g[r][6] = 0; g[r][7] = 9;
+          g[r][23] = 9; g[r][24] = 0; g[r][25] = 9;
+        }
+        g[24][7] = 0;
+        g[24][23] = 0;
+        g[10][15] = 8; // 上部中央に黄色トリガー
+        g[8][10] = 4;
+        g[8][20] = 4;
+        stages.push({ id: 8, name: "TWIN DUCTS", grid: g });
+      }
+
+      // --- STAGE 9: PIXEL SWORD (ドット絵の剣) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        // 斜めの剣をドットで描画
+        for (let i = 0; i < 18; i++) {
+          const r = 4 + i;
+          const c = 24 - i;
+          g[r][c] = 2;
+          g[r][c + 1] = 6;
+          g[r + 1][c] = 6;
+          g[r + 1][c + 1] = 2;
+          if (i % 4 === 2) g[r][c] = 5;
+        }
+        // 鍔（つば）
+        for (let k = -4; k <= 4; k++) {
+          const r = 21 + k;
+          const c = 7 + k;
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+            g[r][c] = 3;
+            g[r + 1][c] = 8;
+          }
+        }
+        // 柄（つか）
+        for (let i = 0; i < 5; i++) {
+          g[23 + i][6 - i] = 4;
+          g[24 + i][6 - i] = 3;
+        }
+        stages.push({ id: 9, name: "PIXEL SWORD", grid: g });
+      }
+
+      // --- STAGE 10: HEART REACTOR (ハートコア) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        for (let r = 3; r < 29; r++) {
+          for (let c = 2; c < COLS - 2; c++) {
+            const nx = (c - 15) / 10.5;
+            const ny = (15 - r) / 10.5;
+            const eq = Math.pow(nx * nx + ny * ny - 1, 3) - nx * nx * Math.pow(ny, 3);
+            if (eq <= 0) {
+              if (eq > -0.18) {
+                g[r][c] = 3; // 外周は硬質アーマー
+              } else if (Math.abs(c - 15) <= 1 && Math.abs(r - 15) <= 1) {
+                g[r][c] = 8; // 中心に黄色トリガー
+              } else if ((r + c) % 6 === 0) {
+                g[r][c] = 4;
+              } else if ((r * 3 + c) % 11 === 0) {
+                g[r][c] = 5;
+              } else {
+                g[r][c] = 6;
+              }
+            }
+          }
+        }
+        stages.push({ id: 10, name: "HEART CORE", grid: g });
+      }
+
+      // --- STAGE 11: PINBALL CHAMBER (ピンボール迷宮) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(1));
+        for (let c = 0; c < COLS; c++) {
+          g[0][c] = 0;
+          g[1][c] = 9;
+        }
+        for (let r = 1; r < 33; r++) {
+          g[r][0] = 9;
+          g[r][COLS - 1] = 9;
+        }
+        // 内部に複数のダイヤモンド型バンパー（不可壊壁）と爆弾を配置
+        const centers = [
+          [9, 9], [9, 21],
+          [17, 15],
+          [25, 9], [25, 21]
+        ];
+        for (const [cr, cc] of centers) {
+          g[cr - 2][cc] = 9;
+          g[cr + 2][cc] = 9;
+          g[cr][cc - 2] = 9;
+          g[cr][cc + 2] = 9;
+          g[cr][cc] = 4; // バンパー中心に爆弾
+          g[cr - 1][cc] = 5;
+          g[cr + 1][cc] = 5;
+        }
+        g[5][15] = 8;
+        stages.push({ id: 11, name: "PINBALL MAZE", grid: g });
+      }
+
+      // --- STAGE 12: FINAL CITADEL (超密度1000ブロック要塞) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(1));
+        for (let c = 0; c < COLS; c++) {
+          g[0][c] = 0;
+          g[1][c] = 9;
+          // 最下段は3箇所の狭いスリットを残してグレー壁
+          if (c === 6 || c === 15 || c === 24) {
+            g[ROWS - 1][c] = 0;
+            g[ROWS - 2][c] = 5;
+          } else {
+            g[ROWS - 1][c] = 9;
+          }
+        }
+        for (let r = 1; r < ROWS; r++) {
+          g[r][0] = 9;
+          g[r][COLS - 1] = 9;
+        }
+        // 内部に爆弾とアイテムと黄色トリガーをバランスよく配置
+        for (let r = 4; r < 32; r += 4) {
+          for (let c = 4; c < 28; c += 4) {
+            if ((r + c) % 8 === 0) g[r][c] = 4;
+            else g[r][c] = 5;
+          }
+        }
+        g[6][15] = 8;
+        g[18][8] = 8;
+        g[18][22] = 8;
+        stages.push({ id: 12, name: "FINAL CITADEL", grid: g });
+      }
+
+      // 補助関数：文字列マップ（15x16程度）を2倍拡大して31x36グリッド中央に配置
+      const charPalette = {
+        '.': 0,
+        'G': 1,  // 濃緑
+        'L': 6,  // 明緑
+        'B': 2,  // 青
+        'R': 7,  // 赤
+        'Y': 12, // 黄金/黄
+        'S': 10, // 肌色/ベージュ
+        'W': 11, // 茶色
+        'H': 3,  // 硬質グレー
+        'X': 4,  // 爆弾
+        'I': 5,  // アイテム確定
+        'T': 8,  // 黄色トリガー(MEGA x3)
+        '#': 9   // 不可壊ウォール
+      };
+
+      function stampArt(artRows, startR = 3, startC = 2) {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        for (let r = 0; r < artRows.length; r++) {
+          const line = artRows[r];
+          for (let c = 0; c < line.length; c++) {
+            const val = charPalette[line[c]] || 0;
+            if (val === 0) continue;
+            // 横2倍・縦2倍でドット絵をくっきり描画
+            for (let dr = 0; dr < 2; dr++) {
+              for (let dc = 0; dc < 2; dc++) {
+                const rr = startR + r * 2 + dr;
+                const cc = startC + c * 2 + dc;
+                if (rr >= 1 && rr < ROWS && cc >= 0 && cc < COLS) {
+                  // 特殊ブロック(4,5,8)は4マスのうち1マスだけにして過剰発動を防止
+                  if ((val === 4 || val === 5 || val === 8) && (dr !== 0 || dc !== 0)) {
+                    g[rr][cc] = val === 4 ? 7 : val === 8 ? 12 : 1;
+                  } else {
+                    g[rr][cc] = val;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return g;
+      }
+
+      // --- STAGE 13: HERO OF TIME (ゼルダのリンクモチーフ) ---
+      {
+        const linkArt = [
+          ".....GGGG....",
+          "....GGGGGG...",
+          "...GGGGGGGG..",
+          "..YYYYYYYYYY.",
+          "..YSSWSSWSSY.",
+          "..YSSSSSSSSY.",
+          "...SSSSSSSS..",
+          ".BBGGGGGGGGB.",
+          "BBBBGGGGGGHBB",
+          "BTTBGGGGGGHBB",
+          "BBBBGGGGGGHBB",
+          ".BB.GGGGGG.B.",
+          "....WWWWWW...",
+          "...WWW..WWW.."
+        ];
+        const g = stampArt(linkArt, 3, 2);
+        // トライフォース風のアイテム配置
+        g[32][15] = 5;
+        g[33][13] = 5;
+        g[33][17] = 5;
+        stages.push({ id: 13, name: "HERO OF TIME", grid: g });
+      }
+
+      // --- STAGE 14: SUPER PLUMBER (マリオモチーフ) ---
+      {
+        const marioArt = [
+          "....RRRRR....",
+          "...RRRRRRRRR.",
+          "...WWWSSWS...",
+          "..WSWSSSWSSS.",
+          "..WSWWSSSWWWW",
+          "..WWSSSSWWWW.",
+          "....SSSSSSS..",
+          "...RRBRRR....",
+          "..RRRBRRRBR..",
+          ".RRRRBBBBBRR.",
+          ".SSRYBBBBYRS.",
+          ".SSSBBBBBBSS.",
+          "..SSBBBBBBSS.",
+          "...BBB..BBB..",
+          "..WWW....WWW."
+        ];
+        const g = stampArt(marioArt, 2, 2);
+        g[33][9] = 5;
+        g[33][21] = 5;
+        stages.push({ id: 14, name: "SUPER PLUMBER", grid: g });
+      }
+
+      // --- STAGE 15: ELECTRIC MOUSE (ピカチュウモチーフ) ---
+      {
+        const pikachuArt = [
+          ".HH.......HH.",
+          ".YYH.....HYY.",
+          "..YYY...YYY..",
+          "..YYYYYYYYY..",
+          ".YYYYYYYYYYY.",
+          ".YYHYYYYYHYY.",
+          ".YXYYYYYYYXY.",
+          "..YYYYYYYYY..",
+          "..YYYYTYYYY..",
+          ".YYYYYYYYYYY.",
+          ".YYYYYYYYYYY.",
+          "..YYYYYYYYY..",
+          "..YYY...YYY..",
+          ".WWW.....WWW."
+        ];
+        const g = stampArt(pikachuArt, 3, 2);
+        // ほっぺの赤い部分(X)が電撃爆発を起こす！
+        g[32][15] = 5;
+        stages.push({ id: 15, name: "ELECTRIC MOUSE", grid: g });
+      }
+
+      // --- STAGE 16: THE ELDEN RING (エルデンリングの紋章) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        // 4つの交差する大ルーンの円環を黄金ブロック(12)で描画
+        const rings = [
+          [11, 15, 6.2],
+          [16, 11, 6.2],
+          [16, 19, 6.2],
+          [21, 15, 6.2]
+        ];
+        for (let r = 2; r < 31; r++) {
+          for (let c = 2; c < COLS - 2; c++) {
+            // 中心の縦軸（黄金律の柱）
+            if (c === 15 && r >= 4 && r <= 28) {
+              g[r][c] = (r === 16) ? 8 : 12;
+            }
+            // 上部の吊り弧
+            if (r === 6 && Math.abs(c - 15) <= 7) {
+              g[r][c] = 12;
+            }
+            // 下部の受け皿の弧（マリカの刻印）
+            if (r === 26 && Math.abs(c - 15) <= 8) {
+              g[r][c] = 12;
+            }
+            // 4つの円環
+            for (const [cr, cc, rad] of rings) {
+              const d = Math.hypot(r - cr, c - cc);
+              if (Math.abs(d - rad) < 0.85) {
+                g[r][c] = 12;
+              }
+            }
+          }
+        }
+        // 円環の交点にトリガー＆アイテムを配置
+        g[13][15] = 5;
+        g[19][15] = 5;
+        g[16][8] = 4;
+        g[16][22] = 4;
+        g[29][15] = 5;
+        stages.push({ id: 16, name: "THE ELDEN RING", grid: g });
+      }
+
+      // --- STAGE 17: THE ERDTREE (狭間の地の黄金樹) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        // 黄金の樹冠（楕円形にびっしり詰まった黄金の葉）
+        for (let r = 2; r <= 19; r++) {
+          for (let c = 2; c <= COLS - 3; c++) {
+            const nx = (c - 15) / 12.5;
+            const ny = (r - 10.5) / 8.5;
+            if (nx * nx + ny * ny <= 1.0) {
+              if ((r + c) % 7 === 0) g[r][c] = 5;
+              else if ((r === 10 && (c === 8 || c === 22))) g[r][c] = 8;
+              else g[r][c] = (r + c) % 2 === 0 ? 12 : 6;
+            }
+          }
+        }
+        // 巨大な黄金樹の幹と根元（不可壊ウォールの樹皮＋中心の祝福）
+        for (let r = 18; r <= 30; r++) {
+          const halfTrunk = r > 26 ? 2 + (r - 26) : 2;
+          g[r][15 - halfTrunk] = 9;
+          g[r][15 + halfTrunk] = 9;
+          for (let c = 15 - halfTrunk + 1; c < 15 + halfTrunk; c++) {
+            g[r][c] = r === 29 && c === 15 ? 8 : 12;
+          }
+        }
+        // 幹の真下に「祝福の光」アイテム
+        g[32][15] = 5;
+        g[33][13] = 5;
+        g[33][17] = 5;
+        stages.push({ id: 17, name: "THE ERDTREE", grid: g });
+      }
+
+      // --- STAGE 18: STARSCOURGE (星砕きラダーン＆朱い腐敗モチーフ) ---
+      {
+        const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        // 上空の重力星（青い円環と中央の引力コア）
+        for (let r = 2; r <= 14; r++) {
+          for (let c = 4; c <= COLS - 5; c++) {
+            const d = Math.hypot(r - 8, c - 15);
+            if (d <= 5.5) {
+              g[r][c] = d <= 2.2 ? 8 : 2;
+            }
+          }
+        }
+        // 交差する二振りの特大剣（硬質グレー＆黄金の刃）
+        for (let i = 0; i < 16; i++) {
+          const r = 10 + i;
+          const c1 = 7 + i;
+          const c2 = 23 - i;
+          if (c1 < COLS) g[r][c1] = 3;
+          if (c2 >= 0) g[r][c2] = 3;
+        }
+        // 下層：ケイリッドの「朱い腐敗」エリア（赤ブロック＋連鎖爆弾の海）
+        for (let r = 22; r <= 31; r++) {
+          for (let c = 2; c <= COLS - 3; c++) {
+            if (r === 22 && (c === 15 || c === 7 || c === 23)) {
+              g[r][c] = 5;
+            } else if ((r % 3 === 0) && (c % 4 === 3)) {
+              g[r][c] = 4; // 朱い腐敗の連鎖爆発
+            } else {
+              g[r][c] = 7;
+            }
+          }
+        }
+        // 突破口用の不可壊ガイド
+        g[32][10] = 9;
+        g[32][20] = 9;
+        g[32][15] = 5;
+        stages.push({ id: 18, name: "STARSCOURGE", grid: g });
+      }
+
+      return stages;
+    }
+
+    const STAGES = createStages();
+
+    /**
+     * ==========================================
+     * 3. セーブデータ管理 (LocalStorage)
+     * ==========================================
+     */
+    const SAVE_KEY = 'many_bricks_breaker_save_v1';
+
+    function loadSaveData() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed.unlockedMaxStageId === 'number') {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Storage read fallback:', e);
+      }
+      return {
+        version: 1,
+        unlockedMaxStageId: 1,
+        stages: {}
+      };
+    }
+
+    function writeSaveData(data) {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Storage write fallback:', e);
+      }
+    }
+
+    let saveData = loadSaveData();
+
+    /**
+     * ==========================================
+     * 4. ゲームエンジン本体
+     * ==========================================
+     */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    // 論理解像度 (31列 * 12px = 372px幅)
+    const LOGICAL_W = 372;
+    const LOGICAL_H = 660;
+    const HEADER_H = 44;
+    const CELL_SIZE = 12; // 31 * 12 = 372, 36 * 12 = 432
+    const GRID_TOP = HEADER_H;
+    const PADDLE_Y = 538;
+    const TOUCH_ZONE_Y = 568;
+    const MAX_BALLS = 450; // 60fps維持のための安全上限
+
+    // 画面状態
+    let gameState = 'TITLE'; // TITLE, STAGE_SELECT, PLAYING, PAUSED, RESULT
+    let currentStageIndex = 0;
+
+    // プレイ中データ
+    let grid = [];
+    let gridHp = [];
+    let remainingBreakable = 0;
+    let score = 0;
+    let lives = 3;
+    let maxBallsRecord = 1;
+    let stageStartTime = 0;
+    let elapsedTime = 0;
+    let pauseStartTime = 0;
+
+    // パドル
+    const paddle = {
+      x: LOGICAL_W / 2,
+      y: PADDLE_Y,
+      baseW: 76,
+      w: 76,
+      h: 10,
+      expandTimer: 0
+    };
+
+    // ボール・アイテム・パーティクル配列
+    let balls = [];
+    let items = [];
+    let particles = [];
+    let floatingTexts = [];
+    let pierceTimer = 0;
+    let screenShake = 0;
+
+    // 入力状態
+    let isPointerDown = false;
+    let lastPointerX = 0;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let pointerMoved = false;
+
+    // キャンバスの高DPIスケーリング設定
+    function resizeCanvas() {
+      const app = document.getElementById('app');
+      const rect = app.getBoundingClientRect();
+      const w = rect.width || window.innerWidth || LOGICAL_W;
+      const h = rect.height || window.innerHeight || LOGICAL_H;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(
+        (w * dpr) / LOGICAL_W,
+        0,
+        0,
+        (h * dpr) / LOGICAL_H,
+        0,
+        0
+      );
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', resizeCanvas);
+    resizeCanvas();
+
+    // ステージ初期化
+    function startStage(stageIdx) {
+      currentStageIndex = stageIdx;
+      const stageDef = STAGES[stageIdx];
+
+      grid = Array.from({ length: ROWS }, (_, r) => [...stageDef.grid[r]]);
+      gridHp = Array.from({ length: ROWS }, (_, r) =>
+        stageDef.grid[r].map(cell => (cell === 3 ? 3 : cell > 0 && cell !== 9 ? 1 : 0))
+      );
+
+      remainingBreakable = 0;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (grid[r][c] > 0 && grid[r][c] !== 9) {
+            remainingBreakable++;
+          }
+        }
+      }
+
+      score = 0;
+      lives = 3;
+      maxBallsRecord = 1;
+      pierceTimer = 0;
+      paddle.w = paddle.baseW;
+      paddle.expandTimer = 0;
+      paddle.x = LOGICAL_W / 2;
+
+      items = [];
+      particles = [];
+      floatingTexts = [];
+
+      resetBallOnPaddle();
+
+      stageStartTime = performance.now();
+      elapsedTime = 0;
+      setScreen('PLAYING');
+    }
+
+    function resetBallOnPaddle() {
+      balls = [{
+        x: paddle.x,
+        y: paddle.y - paddle.h / 2 - 4,
+        vx: 0,
+        vy: 0,
+        speed: 370, // px/sec
+        radius: 3.3,
+        stuck: true
+      }];
+    }
+
+    function launchStuckBalls() {
+      let launched = false;
+      for (const b of balls) {
+        if (b.stuck) {
+          b.stuck = false;
+          // 少し左右に傾けて発射（Hダクト等の真上狙いもしやすい角度）
+          const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.25;
+          b.vx = Math.cos(angle) * b.speed;
+          b.vy = Math.sin(angle) * b.speed;
+          launched = true;
+        }
+      }
+      if (launched) sfx.paddle();
+    }
+
+    // アイテム生成
+    function spawnItem(x, y, forceType = null) {
+      const types = ['SPLIT', 'ADD', 'PIERCE', 'EXPAND'];
+      // x3 と +3 の出現率を高めに設定
+      const weights = [0.42, 0.36, 0.12, 0.10];
+      let chosen = forceType;
+      if (!chosen) {
+        const rand = Math.random();
+        let acc = 0;
+        for (let i = 0; i < types.length; i++) {
+          acc += weights[i];
+          if (rand <= acc) {
+            chosen = types[i];
+            break;
+          }
+        }
+      }
+      items.push({
+        x,
+        y,
+        vy: 145,
+        type: chosen,
+        radius: 9
+      });
+    }
+
+    function addFloatingText(x, y, text, color = '#fff') {
+      if (floatingTexts.length > 25) floatingTexts.shift();
+      floatingTexts.push({ x, y, text, color, life: 0.75 });
+    }
+
+    function spawnParticles(x, y, color, count = 4) {
+      if (particles.length > 180) return; // 負荷制限
+      for (let i = 0; i < count; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 40 + Math.random() * 110;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          size: 2.5 + Math.random() * 2,
+          color,
+          life: 0.25 + Math.random() * 0.2
+        });
+      }
+    }
+
+    // ブロック破壊処理
+    function damageCell(r, c, isBombChain = false) {
+      if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+      const type = grid[r][c];
+      if (type === 0 || type === 9) return;
+
+      gridHp[r][c]--;
+      const cx = c * CELL_SIZE + CELL_SIZE / 2;
+      const cy = GRID_TOP + r * CELL_SIZE + CELL_SIZE / 2;
+
+      if (gridHp[r][c] <= 0) {
+        grid[r][c] = 0;
+        remainingBreakable--;
+        score += 10;
+
+        const colorMap = {
+          1: '#22c55e',
+          2: '#38bdf8',
+          3: '#94a3b8',
+          4: '#f97316',
+          5: '#a3e635',
+          6: '#4ade80',
+          7: '#ef4444',
+          8: '#facc15',
+          10: '#fdba74',
+          11: '#92400e',
+          12: '#f59e0b'
+        };
+        spawnParticles(cx, cy, colorMap[type] || '#4ade80', isBombChain ? 2 : 4);
+
+        if (type === 5) {
+          // アイテム確定ブロック（x3 または +3）
+          spawnItem(cx, cy, Math.random() < 0.6 ? 'SPLIT' : 'ADD');
+        } else if (type === 4) {
+          // 爆弾ブロック：周囲 5x5 を誘爆
+          sfx.bomb();
+          screenShake = 0.18;
+          for (let dr = -2; dr <= 2; dr++) {
+            for (let dc = -2; dc <= 2; dc++) {
+              if (dr === 0 && dc === 0) continue;
+              damageCell(r + dr, c + dc, true);
+            }
+          }
+        } else if (type === 8) {
+          // 黄色トリガーブロック（Hダクト奥などの特殊ギミック）
+          sfx.powerup();
+          screenShake = 0.22;
+          splitAllBalls();
+          addFloatingText(cx, cy, 'MEGA x3!', '#facc15');
+          // 周囲の壁も一部破壊して道を開く
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const nr = r + dr;
+              const nc = c + dc;
+              if (nr > 1 && nr < ROWS - 1 && nc > 0 && nc < COLS - 1) {
+                if (grid[nr][nc] === 9) {
+                  grid[nr][nc] = 0;
+                  spawnParticles(nc * CELL_SIZE + 6, GRID_TOP + nr * CELL_SIZE + 6, '#94a3b8', 3);
+                }
+              }
+            }
+          }
+        } else if (!isBombChain && Math.random() < 0.08) {
+          // 通常ブロックからも低確率ドロップ
+          spawnItem(cx, cy);
+        }
+
+        if (!isBombChain) sfx.hitBrick();
+      } else {
+        sfx.hitWall();
+      }
+    }
+
+    // ボール全分裂 (x3)
+    function splitAllBalls() {
+      if (balls.length >= MAX_BALLS) {
+        score += 500;
+        return;
+      }
+      const current = [...balls];
+      for (const b of current) {
+        if (balls.length >= MAX_BALLS) break;
+        if (b.stuck) continue;
+        const baseAngle = Math.atan2(b.vy, b.vx);
+        const offsets = [-0.28, 0.28];
+        for (const off of offsets) {
+          if (balls.length >= MAX_BALLS) break;
+          const newAng = baseAngle + off;
+          balls.push({
+            x: b.x,
+            y: b.y,
+            vx: Math.cos(newAng) * b.speed,
+            vy: Math.sin(newAng) * b.speed,
+            speed: b.speed,
+            radius: b.radius,
+            stuck: false
+          });
+        }
+      }
+      if (balls.length > maxBallsRecord) {
+        maxBallsRecord = balls.length;
+      }
+    }
+
+    // パドルからボール追加 (+3)
+    function addBallsFromPaddle(count = 3) {
+      for (let i = 0; i < count; i++) {
+        if (balls.length >= MAX_BALLS) break;
+        const angle = -Math.PI / 2 + (i - 1) * 0.26 + (Math.random() - 0.5) * 0.1;
+        const spd = 370;
+        balls.push({
+          x: paddle.x,
+          y: paddle.y - paddle.h / 2 - 4,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          speed: spd,
+          radius: 3.3,
+          stuck: false
+        });
+      }
+      if (balls.length > maxBallsRecord) {
+        maxBallsRecord = balls.length;
+      }
+    }
+
+    // パワーアップ適用
+    function applyItem(type) {
+      sfx.powerup();
+      score += 50;
+      if (type === 'SPLIT') {
+        splitAllBalls();
+        addFloatingText(paddle.x, paddle.y - 20, 'x3 SPLIT!', '#a3e635');
+      } else if (type === 'ADD') {
+        addBallsFromPaddle(3);
+        addFloatingText(paddle.x, paddle.y - 20, '+3 BALLS', '#38bdf8');
+      } else if (type === 'PIERCE') {
+        pierceTimer = 8.0;
+        addFloatingText(paddle.x, paddle.y - 20, 'PIERCE!', '#facc15');
+      } else if (type === 'EXPAND') {
+        paddle.w = Math.min(130, paddle.w + 26);
+        paddle.expandTimer = 14.0;
+        addFloatingText(paddle.x, paddle.y - 20, 'EXPAND!', '#f472b6');
+      }
+    }
+
+    /**
+     * ==========================================
+     * 5. 物理更新ループ (サブステップ衝突判定)
+     * ==========================================
+     */
+    function update(dt) {
+      if (gameState !== 'PLAYING') return;
+
+      elapsedTime = (performance.now() - stageStartTime) / 1000;
+
+      if (pierceTimer > 0) pierceTimer = Math.max(0, pierceTimer - dt);
+      if (paddle.expandTimer > 0) {
+        paddle.expandTimer -= dt;
+        if (paddle.expandTimer <= 0) paddle.w = paddle.baseW;
+      }
+      if (screenShake > 0) screenShake = Math.max(0, screenShake - dt);
+
+      // ボール更新（すり抜け防止のため4サブステップ分割）
+      const SUB_STEPS = 4;
+      const subDt = dt / SUB_STEPS;
+
+      for (let i = balls.length - 1; i >= 0; i--) {
+        const b = balls[i];
+
+        if (b.stuck) {
+          b.x = paddle.x;
+          b.y = paddle.y - paddle.h / 2 - b.radius - 1;
+          continue;
+        }
+
+        let lost = false;
+
+        for (let step = 0; step < SUB_STEPS; step++) {
+          b.x += b.vx * subDt;
+          b.y += b.vy * subDt;
+
+          // 外周壁との反射
+          if (b.x - b.radius < 0) {
+            b.x = b.radius;
+            b.vx = Math.abs(b.vx);
+          } else if (b.x + b.radius > LOGICAL_W) {
+            b.x = LOGICAL_W - b.radius;
+            b.vx = -Math.abs(b.vx);
+          }
+
+          if (b.y - b.radius < GRID_TOP) {
+            b.y = GRID_TOP + b.radius;
+            b.vy = Math.abs(b.vy);
+          }
+
+          // パドルとの反射
+          if (
+            b.vy > 0 &&
+            b.y + b.radius >= paddle.y - paddle.h / 2 &&
+            b.y - b.radius <= paddle.y + paddle.h / 2 &&
+            b.x + b.radius >= paddle.x - paddle.w / 2 &&
+            b.x - b.radius <= paddle.x + paddle.w / 2
+          ) {
+            b.y = paddle.y - paddle.h / 2 - b.radius;
+            const hitOffset = (b.x - paddle.x) / (paddle.w / 2); // -1.0 ~ 1.0
+            const clampedOffset = Math.max(-0.92, Math.min(0.92, hitOffset));
+            const bounceAngle = -Math.PI / 2 + clampedOffset * (Math.PI * 0.36);
+            b.vx = Math.cos(bounceAngle) * b.speed;
+            b.vy = Math.sin(bounceAngle) * b.speed;
+            if (balls.length < 15) sfx.paddle();
+          }
+
+          // グリッドブロックとの空間分割衝突判定 (O(1))
+          const minCol = Math.max(0, Math.floor((b.x - b.radius) / CELL_SIZE));
+          const maxCol = Math.min(COLS - 1, Math.floor((b.x + b.radius) / CELL_SIZE));
+          const minRow = Math.max(0, Math.floor((b.y - GRID_TOP - b.radius) / CELL_SIZE));
+          const maxRow = Math.min(ROWS - 1, Math.floor((b.y + b.radius - GRID_TOP) / CELL_SIZE));
+
+          let collided = false;
+          let hitWallBlock = false;
+
+          for (let r = minRow; r <= maxRow; r++) {
+            for (let c = minCol; c <= maxCol; c++) {
+              const cellType = grid[r][c];
+              if (cellType === 0) continue;
+
+              const bx = c * CELL_SIZE;
+              const by = GRID_TOP + r * CELL_SIZE;
+
+              // AABB と円の最近接点
+              const closestX = Math.max(bx, Math.min(b.x, bx + CELL_SIZE));
+              const closestY = Math.max(by, Math.min(b.y, by + CELL_SIZE));
+              const dx = b.x - closestX;
+              const dy = b.y - closestY;
+              const distSq = dx * dx + dy * dy;
+
+              if (distSq <= b.radius * b.radius) {
+                const isUnbreakable = (cellType === 9);
+                const shouldBounce = isUnbreakable || pierceTimer <= 0;
+
+                if (shouldBounce && !collided) {
+                  collided = true;
+                  if (isUnbreakable) hitWallBlock = true;
+
+                  // めり込み解消と法線方向の反転
+                  const overlapX = (CELL_SIZE / 2 + b.radius) - Math.abs(b.x - (bx + CELL_SIZE / 2));
+                  const overlapY = (CELL_SIZE / 2 + b.radius) - Math.abs(b.y - (by + CELL_SIZE / 2));
+
+                  if (overlapX < overlapY) {
+                    b.vx = b.x < bx + CELL_SIZE / 2 ? -Math.abs(b.vx) : Math.abs(b.vx);
+                    b.x += b.vx > 0 ? overlapX : -overlapX;
+                  } else {
+                    b.vy = b.y < by + CELL_SIZE / 2 ? -Math.abs(b.vy) : Math.abs(b.vy);
+                    b.y += b.vy > 0 ? overlapY : -overlapY;
+                  }
+
+                  // 極端な真横ループの防止（1マス縦ダクト内は垂直移動を許容）
+                  const curCol = Math.floor(b.x / CELL_SIZE);
+                  const curRow = Math.floor((b.y - GRID_TOP) / CELL_SIZE);
+                  const inNarrowShaft =
+                    curRow >= 0 && curRow < ROWS &&
+                    curCol > 0 && curCol < COLS - 1 &&
+                    grid[curRow][curCol - 1] === 9 &&
+                    grid[curRow][curCol + 1] === 9;
+
+                  if (!inNarrowShaft && Math.abs(b.vy) < b.speed * 0.16) {
+                    const signY = b.vy >= 0 ? 1 : -1;
+                    b.vy = signY * b.speed * 0.22;
+                    const signX = b.vx >= 0 ? 1 : -1;
+                    b.vx = signX * Math.sqrt(Math.max(1, b.speed * b.speed - b.vy * b.vy));
+                  }
+                }
+
+                if (!isUnbreakable) {
+                  damageCell(r, c);
+                } else if (hitWallBlock && balls.length < 10) {
+                  sfx.hitWall();
+                }
+              }
+            }
+          }
+
+          // 画面下端落下
+          if (b.y - b.radius > LOGICAL_H) {
+            lost = true;
+            break;
+          }
+        }
+
+        if (lost) {
+          balls.splice(i, 1);
+        }
+      }
+
+      // 全ボールロスト時のライフ減少
+      if (balls.length === 0) {
+        lives--;
+        sfx.loseLife();
+        if (lives <= 0) {
+          finishStage(false);
+          return;
+        } else {
+          pierceTimer = 0;
+          resetBallOnPaddle();
+        }
+      }
+
+      // アイテム落下とパドル取得
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        it.y += it.vy * dt;
+
+        if (
+          it.y + it.radius >= paddle.y - paddle.h / 2 &&
+          it.y - it.radius <= paddle.y + paddle.h / 2 &&
+          it.x + it.radius >= paddle.x - paddle.w / 2 &&
+          it.x - it.radius <= paddle.x + paddle.w / 2
+        ) {
+          applyItem(it.type);
+          items.splice(i, 1);
+          continue;
+        }
+
+        if (it.y - it.radius > LOGICAL_H) {
+          items.splice(i, 1);
+        }
+      }
+
+      // パーティクル更新
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= dt;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      // フローティングテキスト更新
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y -= 28 * dt;
+        ft.life -= dt;
+        if (ft.life <= 0) floatingTexts.splice(i, 1);
+      }
+
+      // ステージクリア判定
+      if (remainingBreakable <= 0) {
+        finishStage(true);
+      }
+    }
+
+    // ステージ終了・セーブ保存
+    function finishStage(isClear) {
+      gameState = 'RESULT';
+      const stageId = STAGES[currentStageIndex].id;
+
+      if (isClear) {
+        sfx.clear();
+        const prev = saveData.stages[stageId] || { cleared: false, highScore: 0, maxBalls: 1, bestTimeSec: null };
+        saveData.stages[stageId] = {
+          cleared: true,
+          highScore: Math.max(prev.highScore, score),
+          maxBalls: Math.max(prev.maxBalls, maxBallsRecord),
+          bestTimeSec: prev.bestTimeSec === null ? elapsedTime : Math.min(prev.bestTimeSec, elapsedTime)
+        };
+        if (stageId + 1 > saveData.unlockedMaxStageId && stageId < STAGES.length) {
+          saveData.unlockedMaxStageId = stageId + 1;
+        }
+        writeSaveData(saveData);
+      }
+
+      document.getElementById('result-title').textContent = isClear ? 'STAGE CLEAR!' : 'GAME OVER';
+      document.getElementById('result-title').style.color = isClear ? '#4ade80' : '#f87171';
+      document.getElementById('res-score').textContent = score.toLocaleString();
+      document.getElementById('res-balls').textContent = maxBallsRecord;
+      document.getElementById('res-time').textContent = elapsedTime.toFixed(1) + 's';
+
+      const nextBtn = document.getElementById('btn-next-stage');
+      if (isClear && currentStageIndex + 1 < STAGES.length) {
+        nextBtn.style.display = 'block';
+      } else {
+        nextBtn.style.display = 'none';
+      }
+
+      setScreen('RESULT');
+    }
+
+    /**
+     * ==========================================
+     * 6. 描画処理
+     * ==========================================
+     */
+    function draw() {
+      // ステージ未ロード時は背景のみ描画してエラーを防ぐ
+      if (!grid || grid.length === 0) {
+        ctx.fillStyle = '#111418';
+        ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+        return;
+      }
+
+      ctx.save();
+
+      if (screenShake > 0) {
+        const mag = screenShake * 18;
+        ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag);
+      }
+
+      // 背景
+      ctx.fillStyle = '#111418';
+      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+      // グリッドブロック描画
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const type = grid[r][c];
+          if (type === 0) continue;
+
+          const x = c * CELL_SIZE;
+          const y = GRID_TOP + r * CELL_SIZE;
+
+          if (type === 1) {
+            ctx.fillStyle = '#2d6a2e'; // 深みのある緑（スクショ風）
+          } else if (type === 2) {
+            ctx.fillStyle = '#0284c7';
+          } else if (type === 3) {
+            const hp = gridHp[r][c];
+            ctx.fillStyle = hp === 3 ? '#64748b' : hp === 2 ? '#94a3b8' : '#cbd5e1';
+          } else if (type === 4) {
+            ctx.fillStyle = '#ea580c';
+          } else if (type === 5) {
+            ctx.fillStyle = '#387d39'; // 緑に溶け込むアイテムブロック
+          } else if (type === 6) {
+            ctx.fillStyle = '#4ade80'; // 明るいライムグリーン（クリーパー等のアクセント）
+          } else if (type === 7) {
+            ctx.fillStyle = '#ef4444'; // レッド（マリオ・腐敗）
+          } else if (type === 8) {
+            ctx.fillStyle = '#facc15'; // 黄色トリガーブロック
+          } else if (type === 9) {
+            ctx.fillStyle = '#71717a'; // 不可壊グレーウォール
+          } else if (type === 10) {
+            ctx.fillStyle = '#fdba74'; // 肌色/ベージュ（ドット絵キャラ）
+          } else if (type === 11) {
+            ctx.fillStyle = '#92400e'; // ブラウン（髪・靴・幹）
+          } else if (type === 12) {
+            ctx.fillStyle = '#f59e0b'; // 黄金色（エルデンリング・黄金樹・ピカチュウ）
+          }
+
+          // 1pxの隙間を空けてマイクロブロックの格子感を表現
+          ctx.fillRect(x + 0.5, y + 0.5, CELL_SIZE - 1, CELL_SIZE - 1);
+
+          // 壁ブロックの立体ハイライト
+          if (type === 9) {
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.fillRect(x + 0.5, y + 0.5, CELL_SIZE - 1, 2);
+          } else if (type === 4) {
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(x + 4, y + 4, 4, 4);
+          }
+        }
+      }
+
+      // パドル描画
+      ctx.fillStyle = pierceTimer > 0 ? '#facc15' : '#e06d53';
+      ctx.beginPath();
+      ctx.roundRect(
+        paddle.x - paddle.w / 2,
+        paddle.y - paddle.h / 2,
+        paddle.w,
+        paddle.h,
+        4
+      );
+      ctx.fill();
+
+      // アイテムカプセル描画（スクショの x3 / +3 カプセル風）
+      for (const it of items) {
+        let bg = '#a3e635';
+        let label = 'x3';
+        if (it.type === 'ADD') {
+          bg = '#38bdf8';
+          label = '+3';
+        } else if (it.type === 'PIERCE') {
+          bg = '#facc15';
+          label = 'PW';
+        } else if (it.type === 'EXPAND') {
+          bg = '#f472b6';
+          label = '<>';
+        }
+
+        ctx.fillStyle = bg;
+        ctx.beginPath();
+        ctx.arc(it.x, it.y, it.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#090d16';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, it.x, it.y + 0.5);
+      }
+
+      // ボール描画
+      ctx.fillStyle = pierceTimer > 0 ? '#fef08a' : '#ffffff';
+      for (const b of balls) {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // パーティクル描画
+      for (const p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life * 2);
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      }
+      ctx.globalAlpha = 1;
+
+      // フローティングテキスト
+      for (const ft of floatingTexts) {
+        ctx.fillStyle = ft.color;
+        ctx.globalAlpha = Math.min(1, ft.life * 1.5);
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(ft.text, ft.x, ft.y);
+      }
+      ctx.globalAlpha = 1;
+
+      // 下部タッチパッド専用エリア（指でパドルが隠れないガイド）
+      ctx.fillStyle = '#181c23';
+      ctx.fillRect(0, TOUCH_ZONE_Y, LOGICAL_W, LOGICAL_H - TOUCH_ZONE_Y);
+      ctx.strokeStyle = '#272e3a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, TOUCH_ZONE_Y);
+      ctx.lineTo(LOGICAL_W, TOUCH_ZONE_Y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('◀  SLIDE HERE TO MOVE  ▶', LOGICAL_W / 2, (TOUCH_ZONE_Y + LOGICAL_H) / 2);
+
+      // 上部ヘッダーUI
+      ctx.fillStyle = '#0d1015';
+      ctx.fillRect(0, 0, LOGICAL_W, HEADER_H);
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const stgNum = String(STAGES[currentStageIndex].id).padStart(2, '0');
+      ctx.fillText(`STG ${stgNum}`, 10, HEADER_H / 2);
+
+      ctx.fillStyle = '#4ade80';
+      ctx.fillText(`BALLS: ${balls.length}`, 68, HEADER_H / 2);
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${score}`, 202, HEADER_H / 2);
+
+      // ライフ表示
+      ctx.fillStyle = '#f87171';
+      ctx.textAlign = 'right';
+      ctx.fillText(`♥ x${lives}`, LOGICAL_W - 46, HEADER_H / 2);
+
+      // 右上ポーズボタン (||)
+      ctx.fillStyle = '#262e3d';
+      ctx.beginPath();
+      ctx.roundRect(LOGICAL_W - 36, 8, 28, 28, 6);
+      ctx.fill();
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(LOGICAL_W - 26, 15, 3, 14);
+      ctx.fillRect(LOGICAL_W - 20, 15, 3, 14);
+
+      // 発射待機ガイド
+      if (balls.some(b => b.stuck)) {
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('TAP TO LAUNCH', LOGICAL_W / 2, PADDLE_Y - 36);
+      }
+
+      ctx.restore();
+    }
+
+    /**
+     * ==========================================
+     * 7. タッチ＆マウス操作ハンドリング
+     * ==========================================
+     */
+    function clientToLogical(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: ((clientX - rect.left) / rect.width) * LOGICAL_W,
+        y: ((clientY - rect.top) / rect.height) * LOGICAL_H
+      };
+    }
+
+    function handlePointerDown(clientX, clientY) {
+      sfx.init();
+      if (gameState !== 'PLAYING') return;
+
+      const pt = clientToLogical(clientX, clientY);
+
+      // 右上ポーズボタン判定
+      if (pt.x >= LOGICAL_W - 42 && pt.y <= HEADER_H + 4) {
+        pauseGame();
+        return;
+      }
+
+      isPointerDown = true;
+      lastPointerX = pt.x;
+      pointerStartX = pt.x;
+      pointerStartY = pt.y;
+      pointerMoved = false;
+    }
+
+    function handlePointerMove(clientX) {
+      if (!isPointerDown || gameState !== 'PLAYING') return;
+      const pt = clientToLogical(clientX, 0);
+      const dx = pt.x - lastPointerX;
+      if (Math.abs(pt.x - pointerStartX) > 4) {
+        pointerMoved = true;
+      }
+      lastPointerX = pt.x;
+
+      // 親指の可動域をカバーするため感度 1.35倍 の相対移動
+      paddle.x += dx * 1.35;
+      const halfW = paddle.w / 2;
+      paddle.x = Math.max(halfW, Math.min(LOGICAL_W - halfW, paddle.x));
+    }
+
+    function handlePointerUp() {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+      if (gameState === 'PLAYING') {
+        // タップまたはスライド後の指離しで吸着ボールを発射
+        launchStuckBalls();
+      }
+    }
+
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        handlePointerMove(e.touches[0].clientX);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', e => {
+      e.preventDefault();
+      handlePointerUp();
+    }, { passive: false });
+
+    // PCブラウザ確認用マウス操作
+    canvas.addEventListener('mousedown', e => handlePointerDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', e => handlePointerMove(e.clientX));
+    window.addEventListener('mouseup', () => handlePointerUp());
+
+    /**
+     * ==========================================
+     * 8. UI・画面遷移・ステージ選択サムネイル生成
+     * ==========================================
+     */
+    const screens = {
+      TITLE: document.getElementById('title-screen'),
+      STAGE_SELECT: document.getElementById('stage-select-screen'),
+      PAUSED: document.getElementById('pause-screen'),
+      RESULT: document.getElementById('result-screen')
+    };
+
+    function setScreen(nextState) {
+      gameState = nextState;
+      Object.values(screens).forEach(el => el.classList.add('hidden'));
+      if (screens[nextState]) {
+        screens[nextState].classList.remove('hidden');
+      }
+      if (nextState === 'STAGE_SELECT') {
+        renderStageGrid();
+      }
+    }
+
+    function pauseGame() {
+      if (gameState !== 'PLAYING') return;
+      pauseStartTime = performance.now();
+      setScreen('PAUSED');
+    }
+
+    function resumeGame() {
+      if (gameState !== 'PAUSED') return;
+      stageStartTime += performance.now() - pauseStartTime;
+      setScreen('PLAYING');
+    }
+
+    // ミニプレビューCanvas描画
+    function drawStageThumbnail(thumbCanvas, stageGrid) {
+      const tCtx = thumbCanvas.getContext('2d');
+      const w = thumbCanvas.width;
+      const h = thumbCanvas.height;
+      tCtx.fillStyle = '#0d1015';
+      tCtx.fillRect(0, 0, w, h);
+
+      const cw = w / COLS;
+      const ch = h / ROWS;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const val = stageGrid[r][c];
+          if (val === 0) continue;
+          if (val === 1 || val === 5) tCtx.fillStyle = '#22c55e';
+          else if (val === 6) tCtx.fillStyle = '#4ade80';
+          else if (val === 2) tCtx.fillStyle = '#38bdf8';
+          else if (val === 3) tCtx.fillStyle = '#94a3b8';
+          else if (val === 4) tCtx.fillStyle = '#f97316';
+          else if (val === 7) tCtx.fillStyle = '#ef4444';
+          else if (val === 8) tCtx.fillStyle = '#facc15';
+          else if (val === 9) tCtx.fillStyle = '#71717a';
+          else if (val === 10) tCtx.fillStyle = '#fdba74';
+          else if (val === 11) tCtx.fillStyle = '#92400e';
+          else if (val === 12) tCtx.fillStyle = '#f59e0b';
+          tCtx.fillRect(c * cw, r * ch, Math.ceil(cw), Math.ceil(ch));
+        }
+      }
+    }
+
+    function renderStageGrid() {
+      const container = document.getElementById('stage-grid');
+      container.innerHTML = '';
+
+      STAGES.forEach((stg, idx) => {
+        const stgData = saveData.stages[stg.id] || {};
+        const isCleared = !!stgData.cleared;
+        const isUnlocked = stg.id <= saveData.unlockedMaxStageId;
+
+        const card = document.createElement('div');
+        card.className = 'stage-card ' + (isCleared ? 'cleared' : isUnlocked ? 'unlocked' : 'locked');
+
+        if (isCleared) {
+          const badge = document.createElement('div');
+          badge.className = 'badge-clear';
+          badge.textContent = '★ CLEAR';
+          card.appendChild(badge);
+        }
+
+        const thumb = document.createElement('canvas');
+        thumb.className = 'stage-thumb';
+        thumb.width = 62;
+        thumb.height = 72;
+        drawStageThumbnail(thumb, stg.grid);
+        card.appendChild(thumb);
+
+        const title = document.createElement('div');
+        title.className = 'stage-title';
+        title.textContent = `STAGE ${stg.id}`;
+        card.appendChild(title);
+
+        const meta = document.createElement('div');
+        meta.className = 'stage-meta';
+        if (!isUnlocked) {
+          meta.textContent = '🔒 LOCKED';
+        } else if (isCleared) {
+          meta.innerHTML = `${stg.name}<br>HI: ${stgData.highScore} / MAX: ${stgData.maxBalls}`;
+        } else {
+          meta.innerHTML = `${stg.name}<br><span style="color:#38bdf8;font-weight:bold;">PLAY</span>`;
+        }
+        card.appendChild(meta);
+
+        card.addEventListener('click', () => {
+          sfx.init();
+          if (!isUnlocked) {
+            card.classList.remove('shake');
+            void card.offsetWidth;
+            card.classList.add('shake');
+            return;
+          }
+          startStage(idx);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // ボタンイベント紐付け
+    document.getElementById('btn-play').addEventListener('click', () => {
+      sfx.init();
+      // 最新の挑戦可能ステージから開始
+      const targetId = Math.min(saveData.unlockedMaxStageId, STAGES.length);
+      const idx = STAGES.findIndex(s => s.id === targetId);
+      startStage(idx >= 0 ? idx : 0);
+    });
+
+    document.getElementById('btn-stage-select').addEventListener('click', () => {
+      sfx.init();
+      setScreen('STAGE_SELECT');
+    });
+
+    document.getElementById('btn-back-title').addEventListener('click', () => setScreen('TITLE'));
+    document.getElementById('btn-resume').addEventListener('click', resumeGame);
+    document.getElementById('btn-retry').addEventListener('click', () => startStage(currentStageIndex));
+    document.getElementById('btn-pause-stages').addEventListener('click', () => setScreen('STAGE_SELECT'));
+    document.getElementById('btn-next-stage').addEventListener('click', () => {
+      if (currentStageIndex + 1 < STAGES.length) {
+        startStage(currentStageIndex + 1);
+      }
+    });
+    document.getElementById('btn-result-retry').addEventListener('click', () => startStage(currentStageIndex));
+    document.getElementById('btn-result-stages').addEventListener('click', () => setScreen('STAGE_SELECT'));
+
+    // サウンド切替
+    function toggleSound() {
+      sfx.init();
+      sfx.enabled = !sfx.enabled;
+      const label = `SOUND: ${sfx.enabled ? 'ON' : 'OFF'}`;
+      document.getElementById('btn-sound-title').textContent = label;
+      document.getElementById('btn-sound-pause').textContent = label;
+    }
+    document.getElementById('btn-sound-title').addEventListener('click', toggleSound);
+    document.getElementById('btn-sound-pause').addEventListener('click', toggleSound);
+
+    // テスト用全ステージ開放＆記録リセット
+    document.getElementById('btn-unlock-all').addEventListener('click', () => {
+      saveData.unlockedMaxStageId = STAGES.length;
+      writeSaveData(saveData);
+      renderStageGrid();
+    });
+
+    document.getElementById('btn-reset-save').addEventListener('click', () => {
+      saveData = { version: 1, unlockedMaxStageId: 1, stages: {} };
+      writeSaveData(saveData);
+      renderStageGrid();
+      const btn = document.getElementById('btn-reset-save');
+      btn.textContent = 'リセット完了';
+      setTimeout(() => { btn.textContent = '記録リセット'; }, 1200);
+    });
+
+    /**
+     * ==========================================
+     * 9. メインアニメーションループ
+     * ==========================================
+     */
+    let lastFrameTime = performance.now();
+    function loop(now) {
+      const dt = Math.min((now - lastFrameTime) / 1000, 0.05); // フレーム落ち時の突き抜け防止に上限50ms
+      lastFrameTime = now;
+
+      update(dt);
+      draw();
+
+      requestAnimationFrame(loop);
+    }
+
+    // 初期描画開始
+    window.onload = function () {
+      resizeCanvas();
+      requestAnimationFrame(loop);
+    };
+  </script>
+</body>
+</html>
